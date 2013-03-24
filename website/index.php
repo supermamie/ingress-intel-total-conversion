@@ -4,9 +4,8 @@ $path = "release";
 
 if ( $_REQUEST['build'] == 'dev' )
 	$path = "dev";
-
-if ( $_REQUEST['build'] == 'local' )
-	$path = "../build/local";
+else if(trim($_REQUEST['build'])!='' && strpos(trim($_REQUEST['build']), '.')===false)
+	$path = '../build/'.trim($_REQUEST['build']);
 
 
 function loadUserScriptHeader($path)
