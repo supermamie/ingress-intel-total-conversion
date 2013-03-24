@@ -8,7 +8,7 @@
 	
 	function loadUserScriptHeader($path)
 	{
-		$result = Array();
+		unset($result);
 	
 		$f = fopen ( $path, "rt" );
 		while ( ( $line = fgets ( $f ) ) !== FALSE )
@@ -17,14 +17,14 @@
 				break;
 	
 			$matches = Array();
-			if ( preg_match ( '#^//[ \\t]*(@[a-zA-Z0-9]+)[ \\t]+(.*)$#', $line, $matches ) )
+			if ( preg_match ( '#^//[ \\t]*@([a-zA-Z0-9]+)[ \\t]+(.*)$#', $line, $matches ) )
 			{
 				$name = $matches[1];
 				$value = $matches[2];
 	
 				if ( ! array_key_exists ( $name, $result ) )
 				{
-					$result[$name] = $value;
+					$result->$name = $value;
 				}
 			}
 		}
@@ -44,10 +44,9 @@
 		$plugins[] = $details;
 	}
 	
-	$result = array(
-			'main' => $iitc_details,
-			'plugins' => $plugins
-	);
+	unset($result);
+	$result->main = $iitc_details;
+	$result->plugins = $plugins;
 	
 	echo json_encode($result);
 ?>
