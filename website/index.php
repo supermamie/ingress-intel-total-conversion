@@ -5,6 +5,9 @@ $path = "release";
 if ( $_REQUEST['build'] == 'dev' )
 	$path = "dev";
 
+if ( $_REQUEST['build'] == 'local' )
+	$path = "../build/local";
+
 
 function loadUserScriptHeader($path)
 {
