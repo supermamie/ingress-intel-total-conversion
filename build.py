@@ -4,6 +4,7 @@ import glob
 import time
 import re
 import io
+import base64
 import sys
 import os
 import shutil
@@ -19,14 +20,24 @@ try:
 except ImportError:
     pass
 
+# load default build
+try:
+    from localbuildsettings import defaultBuild
+except ImportError:
+    defaultBuild = None
+
+
+buildName = defaultBuild
 
 # build name from command line
-if len(sys.argv) != 2:	# argv[0] = program, argv[1] = buildname, len=2
-    print "Usage: build.py buildname"
-    print " available build names:", ','.join(buildSettings.keys())
-    sys.exit(1)
+if len(sys.argv) == 2:	# argv[0] = program, argv[1] = buildname, len=2
+    buildName = sys.argv[1]
 
-buildName = sys.argv[1]
+
+if buildName is None or not buildName in buildSettings:
+    print ("Usage: build.py buildname")
+    print (" available build names: %s" % ', '.join(buildSettings.keys()))
+    sys.exit(1)
 
 settings = buildSettings[buildName]
 
@@ -55,6 +66,10 @@ def loaderRaw(var):
     fn = var.group(1)
     return readfile(fn)
 
+def loaderImage(var):
+    fn = var.group(1)
+    return 'data:image/png;base64,{0}'.format(str(base64.encodestring(open(fn, 'rb').read())).replace('\n', ''))
+
 def loadCode(ignore):
     return '\n\n'.join(map(readfile, glob.glob('code/*')))
 
@@ -71,6 +86,7 @@ def doReplacements(script,updateUrl,downloadUrl):
 
     script = re.sub('@@INCLUDERAW:([0-9a-zA-Z_./-]+)@@', loaderRaw, script)
     script = re.sub('@@INCLUDESTRING:([0-9a-zA-Z_./-]+)@@', loaderString, script)
+    script = re.sub('@@INCLUDEIMAGE:([0-9a-zA-Z_./-]+)@@', loaderImage, script)
 
     script = script.replace('@@BUILDDATE@@', buildDate)
     script = script.replace('@@DATETIMEVERSION@@', dateTimeVersion)

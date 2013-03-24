@@ -26,7 +26,8 @@ window.chat.handleTabCompletion = function() {
 
   var posStart = curPos - word.length;
   var newText = text.substring(0, posStart);
-  newText += nick + (posStart === 0 ? ': ' : ' ');
+  var atPresent = text.substring(posStart-1, posStart) === '@';
+  newText += (atPresent ? '' : '@') + nick + ' ';
   newText += text.substring(curPos);
   el.val(newText);
 }
@@ -279,6 +280,11 @@ window.chat.writeDataToHash = function(newData, storageHash, skipSecureMsgs) {
         msg += tmp.replace(window.PLAYER['nickMatcher'], '<em>$1</em>');
         break;
 
+      case 'AT_PLAYER':
+        var tmp = $('<div/>').text(markup[1].plain).html().autoLink();
+        msg += tmp.replace(window.PLAYER['nickMatcher'], '<em>$1</em>');
+        break;
+
       case 'PORTAL':
         var latlng = [markup[1].latE6/1E6, markup[1].lngE6/1E6];
         var perma = 'https://ingress.com/intel?latE6='+markup[1].latE6+'&lngE6='+markup[1].lngE6+'&z=17&pguid='+markup[1].guid;
@@ -356,11 +362,18 @@ window.chat.renderMsg = function(msg, nick, time, team) {
   var tb = unixTimeToString(time, true);
   // help cursor via “#chat time”
   var t = '<time title="'+tb+'" data-timestamp="'+time+'">'+ta+'</time>';
-  var s = 'style="color:'+COLORS[team]+'"';
+  var s = 'style="cursor:pointer; color:'+COLORS[team]+'"';
   var title = nick.length >= 8 ? 'title="'+nick+'" class="help"' : '';
   var i = ['<span class="invisep">&lt;</span>', '<span class="invisep">&gt;</span>'];
-  return '<tr><td>'+t+'</td><td>'+i[0]+'<mark class="nickname" '+s+'>'+nick+'</mark>'+i[1]+'</td><td>'+msg+'</td></tr>';
+  return '<tr><td>'+t+'</td><td>'+i[0]+'<mark class="nickname" onclick="window.chat.addNickname(\'@' + nick + '\')" ' + s + '>'+ nick+'</mark>'+i[1]+'</td><td>'+msg+'</td></tr>';
 }
+
+window.chat.addNickname= function(nick){
+    var c = document.getElementById("chattext");
+    c.value = [c.value, nick, " "].join(" ").trim() + " ";
+    c.focus()
+}
+
 
 
 
